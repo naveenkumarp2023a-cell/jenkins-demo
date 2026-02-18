@@ -1,29 +1,43 @@
 pipeline {
     agent any
 
-    stage('Build') {
-    steps {
-        error "Forcing build failure"
+    triggers {
+        pollSCM('* * * * *')
     }
-}
 
+    stages {
 
-        stage('Test') {
+        stage('Checkout') {
             steps {
-                echo 'Testing project...'
+                echo 'Checking out source code...'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Compiling Java program...'
+                bat 'javac Hello.java'
+            }
+        }
+
+        stage('Run') {
+            steps {
+                echo 'Running Java program...'
+                bat 'java Hello'
             }
         }
     }
 
     post {
         success {
-            echo 'Build completed successfully!'
+            archiveArtifacts artifacts: '*.class'
+            echo 'Build Successful and Artifact Archived'
         }
         failure {
-            echo 'Build failed!'
+            echo 'Build Failed!'
         }
         always {
-            echo 'Pipeline execution finished.'
+            echo 'Mini CI Pipeline Completed'
         }
     }
 }
